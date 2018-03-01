@@ -4,8 +4,7 @@
   "description": "Node, Express, Bootstrap 4 web app to browse and publish pictures that can be commented on and upvoted. Also an unnecessary socket.io chat tacked on just for the sake of it.",
   "main": "server.js",
   "scripts": {
-    "test": "mocha",
-    "start": "nodemon server --inspect"
+    "test": "mocha"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
