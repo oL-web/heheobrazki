@@ -25,6 +25,7 @@ mongoose.connect(`mongodb://${process.env.MONGO_USER}:${process.env.MONGO_PWD}@d
 mongoose.connection.once("open", () => log("Connected to MongoDB"));
 mongoose.connection.on("error", (err) => log("MongoDB unreachable"));
 
+if(app.get('env') === 'production') app.set('trust proxy', 1);
 app.use(helmet());
 app.use(session({
     secret: process.env.SESSION_SECRET,
