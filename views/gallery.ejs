@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+
+<html lang="pl">
+
+<head>
+    <% include partials/head %>
+</head>
+
+<body>
+    <% include partials/nav %>
+    <a href="/gallery/addpicture" class="btn btn-block btn-primary">Wyślij obrazek</a>
+        <div class="container user-cards">
+            <div class="card-deck">
+                
+                
+                <% pictures.forEach(function(picture){ %>
+                    <div class="col-md-8 col-lg-7">
+                    <div class="card bg-light">
+                        <div class="card-header">
+                            <%= picture.author.name %>
+                        </div>
+                        <a href="/gallery/picture/<%= picture.id %>">
+                        <img class="full-width" src="/pictures/<%= picture.author.id %>/<%= picture.filename %>" >
+                    </a>
+                        <div class="card-body">
+                            <h2 class="card-title"><%= picture.title %></h2>
+                            <% if(picture.description){ %>
+                            <p class="card-description"><%= picture.description %></p>
+                            <% } %>    
+                               <a href="/gallery/upvotepicture/<%= picture.id %>" class="btn btn-block btn-outline-success btn-score">+<%= picture.upvotesFrom.length %></a>
+                        </div>
+                    </div>
+
+                </div>
+                    
+               <%   }); %>
+                
+            </div>
+
+            <nav>
+                    <ul class="pagination justify-content-center text-center">
+                    <% if(!(page >= totalPages)){ %>
+                        <% if(page !== 1){ %>
+                        <li class="page-item"><a class="page-link" href="/gallery/<%= page - 1 %>">Poprzednia strona</a></li>
+                        <li class="page-item"><a class="page-link" href="/gallery/<%= page - 1 %>"><%= page - 1 %></a></li>
+                        <% } %>      
+                        <li class="page-item active"><a class="page-link" href="/gallery/<%= page %>"><%= page %></a></li>
+        
+                        
+                            <li class="page-item"><a class="page-link" href="/gallery/<%= page + 1 %>"><%= page + 1 %></a></li>
+                             <li class="page-item"><a class="page-link" href="/gallery/<%= page + 1 %>">Następna strona</a></li>
+                    <% } else{ %> 
+                        <li class="page-item"><a class="page-link" href="/gallery/1">Wróć na początek</a></li>
+                        <li class="page-item"><a class="page-link" href="/gallery/<%= totalPages %>">Ostatnia strona</a></li>
+                    <% } %>     
+                    </ul>
+                </nav>
+        </div>
+
+        <video autoplay muted loop class="background-video">
+      <source src="https://ak9.picdn.net/shutterstock/videos/20148409/preview/stock-footage-young-man-teenager-eating-doner-kebab-at-the-city-park-autumn-day.mp4" type="video/mp4">
+    </video>
+
+        <% include partials/scripts %>
+<script>
+    document.addEventListener("DOMContentLoaded", function (e) {
+        [].slice.call(document.querySelectorAll(".btn-score")).forEach(function(item){
+            item.onclick = function (e) {
+                e.preventDefault();
+
+                $.ajax({
+                    url: item.href,
+                    type: "POST",
+                    error: function (res) {
+                       item.textContent = res.responseText;
+                    },
+                    success: function (res) {
+                        item.textContent = "+" + (Number(item.textContent.split("+")[1]) + 1); 
+                    }
+                });
+                item.onclick = function(e){e.preventDefault();};
+            };
+        });     
+     });
+</script>
+</body>
+
+</html>

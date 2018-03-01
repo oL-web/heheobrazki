@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+
+<html lang="pl">
+
+<head>
+    <% include ../partials/head %>
+</head>
+
+<body>
+    <% include ../partials/nav %>
+
+
+        <div class="container login-container">
+
+            <div class="row">
+                <section class="col form-container">
+                    <h2>Dodaj obrazek</h2>
+                    <form method="post" autocomplete="off" enctype="multipart/form-data" id="picture-form">
+                        <div class="form-group">
+                            <label for="title">Tytuł</label>
+                            <input name="title" type="text" class="form-control" id="title" placeholder="Tytuł obrazka">
+                        </div>
+                        <div class="form-group">
+                            <label for="description">Opis(opcjonalny)</label>
+                            <textarea name="description" class="form-control" id="description" rows="3"></textarea>
+                        </div>
+                        <div class="form-group text-center picture-upload">
+                            <div class="custom-file">
+                                <input type="file" name="picture" class="custom-file-input" id="picture">
+                                <label class="custom-file-label" for="picture" id="">Wybierz obrazek</label>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-block btn-primary">Wyślij obrazek</button>
+                    </form>
+                </section>
+            </div>
+        </div>
+        <video autoplay muted loop class="background-video">
+            <source src="https://ak4.picdn.net/shutterstock/videos/20148394/preview/stock-footage-young-man-teenager-eating-doner-kebab-at-the-city-park-autumn-day.mp4"
+                type="video/mp4">
+        </video>
+
+        <% include ../partials/scripts %>
+            <script>
+                document.addEventListener("DOMContentLoaded", function (e) {
+                    var fileInputLabel = document.querySelector("[type=file] + label");
+                    var pictureUploadContainer = document.querySelector(".picture-upload");
+                    var img;
+
+                    document.querySelector("[type=file]").onchange = function (e) {
+                        var reader = new FileReader();
+                        reader.onload = function (e) {
+                            if (img) return img.src = e.target.result;
+                            img = document.createElement("img");
+                            img.className = "img-preview";
+                            img.src = e.target.result;
+                            pictureUploadContainer.insertAdjacentElement("afterbegin", img);
+                        };
+                        reader.readAsDataURL(this.files[0]);
+                        fileInputLabel.textContent = this.files[0].name;
+                    };
+                    
+                    var loginContainer = document.querySelector(".login-container");
+                    var msg;
+
+                    document.getElementById("picture-form").onsubmit = function (e) {
+                        e.preventDefault();
+
+                        var data = new FormData();
+                        data.append('title', e.target[0].value);
+                        data.append('description', e.target[1].value);
+                        data.append('picture', e.target[2].files[0]);
+                        $.ajax({
+                            url: location.href,
+                            type: "POST",
+                            data: data,
+                            contentType: false,
+                            processData: false,
+                            error: function (res) {
+                                if (!msg){
+                                    msg = document.createElement("div");
+                                    msg.className = "alert alert-danger";
+                                    msg.setAttribute("role", "alert");
+                                    msg.textContent = res.responseJSON.msg;
+                                    loginContainer.insertAdjacentElement("afterbegin", msg);
+                                }else{
+                                    msg.textContent = res.responseJSON.msg;
+                                }   
+                                msg.scrollIntoView(false);
+                            },
+                            success: function (res) {
+                                location.href = location.origin + "/gallery/1";
+                            }
+                        });
+                    };
+                });
+            </script>
+</body>
+
+</html>

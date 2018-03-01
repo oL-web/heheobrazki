@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+
+<html lang="pl">
+
+<head>
+    <% include partials/head %>
+</head>
+
+<body>
+    <% include partials/nav %>
+
+
+        <div class="container">
+            <ul class="messages list-group list-group-flush w-100 mt-5">
+            </ul>
+            <div class="row">
+                <form class="col form-container" method="post" autocomplete="off">
+                    <div class="form-group">
+                        <label for="message">Napisz wiadomość:</label>
+                        <textarea name="message" class="form-control" id="message" rows="3" required></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-block btn-primary">Wyślij wiadomość</button>
+                </form>
+            </div>
+        </div>
+
+        <video autoplay muted loop class="background-video">
+            <source src="https://ak5.picdn.net/shutterstock/videos/20148385/preview/stock-footage-young-man-teenager-eating-doner-kebab-at-the-city-park-autumn-day.mp4"
+                type="video/mp4">
+        </video>
+
+        <% include partials/scripts %>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.4/socket.io.slim.js"></script>
+            <script>
+                document.addEventListener("DOMContentLoaded", function (e) {
+                    var messageInput = document.getElementById("message");
+                    var messagesContainer = document.querySelector(".messages");
+                    var socket = io.connect(location.origin);
+
+                    var round = function (num) {
+                        if (num < 10) num = "0" + num;
+                        return num;
+                    };
+
+                    socket.on('message received', function (obj) {
+                        var dt = new Date(obj.timestamp);
+                        var date = round(dt.getHours()) + ":" + round(dt.getMinutes());
+
+                        var li = document.createElement("li");
+                        var time = document.createElement("span");
+                        var msg = document.createElement("p");
+                        li.className = "message list-group-item";
+                        time.className = "text-muted font-italic small";
+                        msg.className = "ml-2 mb-0";
+                        time.textContent = date;
+                        msg.textContent = obj.message;
+                        li.appendChild(time);
+                        li.appendChild(msg);
+                        messagesContainer.insertAdjacentElement("afterbegin", li);
+                    });
+
+                    document.querySelector("form").onsubmit = function (e) {
+                        e.preventDefault();
+
+                        if (messageInput.value.trim()) {
+                            socket.emit("message sent", {
+                                timestamp: Date.now(),
+                                message: messageInput.value
+                            });
+
+                            messageInput.value = "";
+                            messageInput.focus();
+                        }
+                    };
+                });
+            </script>
+</body>
+
+</html>

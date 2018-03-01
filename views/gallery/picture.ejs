@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+
+<html lang="pl">
+
+<head>
+    <% include ../partials/head %>
+</head>
+
+<body>
+    <% include ../partials/nav %>
+
+        <div class="container user-cards">
+            <div class="card-deck">
+                <div class="col-md-8 col-lg-7">
+                    <div class="card bg-light">
+                        <div class="card-header">
+                            <%= picture.author.name %>
+                        </div>
+                        <img class="full-width" src="/pictures/<%= pictureAuthorId %>/<%= picture.filename %>">
+
+                        <div class="card-body">
+                            <h2 class="card-title">
+                                <%= picture.title %>
+                            </h2>
+                            <% if(picture.description){ %>
+                                <p class="card-description">
+                                    <%= picture.description %>
+                                </p>
+                                <% } %>
+                                    <a href="/gallery/upvotepicture/<%= picture.id %>" class="btn btn-block btn-outline-success btn-score">+<%= picture.upvotesFrom.length %>
+                                    </a>
+                        </div>
+                    </div>
+
+                    <div class="comments mb-5">
+                        <ul class="list-group list-group-flush">
+                            <li class="comment list-group-item">
+                                <form action="addcomment" method="post" autocomplete="off">
+                                    <div class="form-group">
+                                        <input type="hidden" name="pictureId" value="<%= pictureId %>" />
+                                        <label for="comment">Skomentuj obrazek:</label>
+                                        <textarea name="comment" class="form-control" id="comment" rows="3" required></textarea>
+                                    </div>
+
+                                    <button type="submit" class="btn btn-block btn-primary">Wyślij komentarz</button>
+                                </form>
+                            </li>
+                            <% picture.comments.reverse().forEach(function(comment){ %>
+                                <li class="comment list-group-item"><%= comment.author.name %>,
+                                        <span class="text-muted font-italic">
+                                            <% var dt = new Date(comment.timestamp);
+                                            var round = function(num){
+                                                if(num<10) num = "0"+num;
+                                                return num;
+                                            };
+                                            var dateText = `${round(dt.getHours())}:${round(dt.getMinutes())} ${round(dt.getDate())}.${round(dt.getMonth()+1)}.${dt.getFullYear()}`;
+                                        %>
+                                                <%= dateText %>
+                                        </span>
+                                        <p class="mt-2">
+                                            <%= comment.message %>
+                                        </p>
+                                        <a href="/gallery/upvotecomment/<%= comment.id %>" class="btn btn-outline-success btn-upvotecomment">+<%= comment.upvotesFrom.length %>
+                                        </a>
+                                </li>
+                                <%   }); %>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <video autoplay muted loop class="background-video">
+            <source src="https://ak1.picdn.net/shutterstock/videos/20148361/preview/stock-footage-young-man-teenager-eating-doner-kebab-at-the-city-park-autumn-day.mp4"
+                type="video/mp4">
+        </video>
+
+        <% include ../partials/scripts %>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function (e) {
+        var upvotePictureBtn = document.querySelector(".btn-score");
+        upvotePictureBtn.onclick = function (e) {
+            e.preventDefault();
+
+            $.ajax({
+                url: upvotePictureBtn.href,
+                type: "POST",
+                error: function (res) {
+                    upvotePictureBtn.textContent = res.responseText;
+                },
+                success: function (res) {
+                    upvotePictureBtn.textContent = "+" + (Number(upvotePictureBtn.textContent.split("+")[1]) + 1);
+                }
+            });
+            upvotePictureBtn.onclick = function (e) { e.preventDefault(); };
+        };
+
+        [].slice.call(document.querySelectorAll(".btn-upvotecomment")).forEach(function (item) {
+            item.onclick = function (e) {
+                e.preventDefault();
+
+                $.ajax({
+                    url: item.href,
+                    type: "POST",
+                    data:{
+                    pictureId:"<%= picture.id %>"
+                    },
+                    error: function (res) {
+                        item.textContent = res.responseText;
+                    },
+                    success: function (res) {
+                        item.textContent = "+" + (Number(item.textContent.split("+")[1]) + 1);
+                    }
+                });
+                item.onclick = function (e) { e.preventDefault(); };
+            };
+        });
+    });
+</script>
+</body>
+
+</html>
